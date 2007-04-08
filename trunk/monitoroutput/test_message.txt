@@ -1,0 +1,2 @@
+This is a line with an error
+This is the ErrorClass and should be ignored.

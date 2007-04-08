@@ -1,0 +1,4 @@
+#!python
+import monitoroutput.monitoroutput
+monitoroutput.monitoroutput.parse_command_line()
+
