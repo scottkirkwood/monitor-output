@@ -84,7 +84,7 @@ class MonitorOutput:
     import os
     import plugins
     
-    plugindir = os.path.join(plugins.__file__.replace('__init__.pyc', ''))
+    plugindir = os.path.join(re.sub('__init__.py.?', '', plugins.__file__))
     ret = os.listdir(plugindir)
     return ret
 
