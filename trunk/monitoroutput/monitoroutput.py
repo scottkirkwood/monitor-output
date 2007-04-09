@@ -22,9 +22,8 @@ class MonitorOutput:
   def run(self, arguments):
     self.select_plugin()
     self.args = arguments[1:]
-    print self.args
     p = subprocess.Popen(self.args, 
-        stdout=subprocess.PIPE, close_fds=True)
+        stdout=subprocess.PIPE, close_fds=True, shell=True)
     output = p.stdout
     for line in output:
       for event in self.curplugin.events:
@@ -44,7 +43,7 @@ class MonitorOutput:
     """
     found_groups = None
     for grep in event['greps']:
-      match = self._search_grep(grep, event['params'], line)
+      match = self._search_grep(grep, event.get('params', 0), line)
       if match:
         found_groups = match
         break
