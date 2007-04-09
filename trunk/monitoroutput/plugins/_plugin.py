@@ -4,62 +4,94 @@
 # Copyright 2007 Scott Kirkwood
 
 import unittest
+import re
 
-class ClipboardPlugin:
+ANSI_NORMAL = '\033[0m'   # Reset ANSI_NORMAL coloring
+ansi_format = '\033[%sm'
+color_templates = dict(
+    Black= "0;30",
+    Red = "0;31",
+    Green = "0;32",
+    Brown = "0;33",
+    Blue = "0;34",
+    Purple = "0;35",
+    Cyan = "0;36",
+    LightGray = "0;37",
+    DarkGray = "1;30",
+    LightRed = "1;31",
+    LightGreen = "1;32",
+    Yellow = "1;33",
+    LightBlue = "1;34",
+    LightPurple = "1;35",
+    LightCyan = "1;36",
+    White = "1;37", 
+  )
+
+def getColor(color):
+  return ansi_format % (color_templates[color])
+  
+
+class MonitorPlugin:
   def __init__(self):
-    self.last_message = ''
-    self.was_converted = False
-    
-  def message(self):
-    """ Short message describing what happened 
-    
-    Returns: String or empty string (not None)
-    """
-    return self.last_message
-    
-  def converted(self):
-    """ Was the last convet() call successfull? 
-    
-    Returns: True/False
-    """
-    return self.was_converted
-    
-  def _ret_result(self, message, sucess, text=''):
-    self.last_message = message
-    self.was_converted = sucess
-    return text
+    self.events = [
+      dict(
+        params = re.IGNORECASE,
+        greps = [ 'Error'],
+        unless = [],
+        commands = [ Colorize(color="Red"),],
+      ),
+      dict(
+        params = re.IGNORECASE,
+        greps = [ 'Hey'],
+        unless = [],
+        commands = [ Notify(message="Hey Man"),],
+      ),
+    ]
+  
 
   def name(self):
-    """ This is the name that appears in the dialog """
+    """ This plugin's name """
     pass
     
   def description(self):
-    """ This is long description that shows up in tool tips """
+    """ Description for help """
     pass
     
-  def convert(self, text):
-    """ This is the function that does the actual convertion """
+  def search(self):
+    pass
+
+class CommandPlugin:
+  def __call__(self, match, line):
+    return line
   
+class Colorize(CommandPlugin):
+  def __init__(self, color):
+    self.color = color
+  
+  def __call__(self, match, line):
+    ret = []
+    ret.append(line[0:match.start()])
+    ret.append(getColor(self.color))
+    ret.append(match.group(0))
+    ret.append(ANSI_NORMAL)
+    ret.append(line[match.end():])
+    return ''.join(ret)
+
+class Notify(CommandPlugin):
+  def __init__(self, message):
+    self.message = message
+  
+  def __call__(self, match, line):
+    import pynotify
+    
+    if not pynotify.is_initted():
+      pynotify.init('monitor-output-notify')
+    self.notify = pynotify.Notification(self.message, 'xyz')
+    self.notify.show()
+    return line
+
 class TestPlugin(unittest.TestCase):
   def setUp(self):
     """ Setup self.instance here """
     pass
-    
-  def verify_good_samples(self, good_samples, expected_ok = None):
-    """ Verify that an array of (intput, expected-output) match
-    Ex
-    """
-    for good_sample, expected in good_samples:
-      results = self.instance.convert(good_sample)
-      self.assertTrue(self.instance.converted())
-      if expected_ok != None:
-        if not self.instance.message().startswith(expected_ok):
-          self.fail("Expected: " + expected_ok + " but got " + self.instance.message())
-      self.assertEquals(expected, results)
-
-  def verify_bad_samples(self, bad_samples):
-    for bad_sample in bad_samples:
-      results = self.instance.convert(bad_sample)
-      self.assertFalse(self.instance.converted())
-      self.assertEquals('', results)
     

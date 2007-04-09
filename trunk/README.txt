@@ -3,6 +3,10 @@ Monitor Output
 
 Run a program and monitor it's output when something happens you can cause an event to happen.
 
+Some prebuild events are:
+  * Color some text like error messages so that the line stands out
+  * Send a message via
+
 Install
 -------
 
