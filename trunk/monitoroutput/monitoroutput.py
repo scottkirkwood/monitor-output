@@ -12,6 +12,7 @@ __author__ = 'scottakirkwood@gmail.com (Scott Kirkwood)'
 import re
 import os
 import sys
+import select
 import subprocess
 
 class MonitorOutput:
@@ -22,15 +23,21 @@ class MonitorOutput:
   def run(self, arguments):
     self.select_plugin()
     self.args = arguments[1:]
-    p = subprocess.Popen(self.args, 
-        stdout=subprocess.PIPE, close_fds=True, shell=True)
+    print self.args
+    p = subprocess.Popen(' '.join(self.args), 
+        stdout=subprocess.PIPE, stderr=subprocess.STDOUT, 
+        close_fds=True, shell=True)
+        
     output = p.stdout
-    for line in output:
+    
+    while True:
+      line = output.readline()
+      if not line:
+        break
       for event in self.curplugin.events:
         match = self.search(event, line)
         if match:
           line = self.run_events(event, match, line)
-      
       sys.stdout.write(line)
       
   def select_plugin(self):
