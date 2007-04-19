@@ -3,6 +3,7 @@
 #
 # Copyright 2007 Scott Kirkwood
 
+import monitoroutput.monitoroutput
 import _plugin
 import _colorize_cmd
 import _notify_cmd
@@ -20,7 +21,8 @@ class ColorizePlugin(_plugin.MonitorPlugin):
         params = re.IGNORECASE,
         greps = [ 'Error', 'Exception in thread "'],
         unless = [],
-        commands = [ _colorize_cmd.ColorizeCmd(color="Red"),],
+        commands = [ _notify_cmd.NotifyCmd(subject="Monitor Output", 
+            message="Error occured"),],
       ),
       dict(
         greps = [ 'WARNING:'],
@@ -36,7 +38,7 @@ class ColorizePlugin(_plugin.MonitorPlugin):
       ),
       dict(
         params = re.IGNORECASE,
-        greps = [r'\s(\S+)\sinitialized and serving traffic$'],
+        greps = [r'\s(\S+)\sinitialized and serving traffic'],
         unless = [],
         commands = [ _notify_cmd.NotifyCmd(subject="Monitor Output", 
             message="%(group1)s started and serving traffic"),],
@@ -57,7 +59,19 @@ class ColorizePlugin(_plugin.MonitorPlugin):
 class TestPlugin(_plugin.TestCommand):
   def setUp(self):
     """ Setup self.instance here """
+    self.mo = monitoroutput.monitoroutput.MonitorOutput()
     self.instance = ColorizePlugin()
+    self.mo.curplugin = self.instance
     
+  def testServingTraffic(self):
+    line = "070419 19:07:11.861:I 40 [Thread-12] [com2.run] AXTE initialized and serving traffic"
+    self.mo.handle_line(line)
 
+  def testWarning(self):
+    line = "] WARNING: blabla"
+    out = self.mo.handle_line(line)
+    self.assertEquals('] \033[0;34mWARNING:\033[0m blabla', out)
 
+if __name__ == "__main__":
+  import unittest
+  unittest.main()

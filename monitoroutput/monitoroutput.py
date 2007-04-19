@@ -17,11 +17,9 @@ import subprocess
 
 class MonitorOutput:
   def __init__(self):
-    self.FindModules()
     self.args = ['cat', 'test_message.txt']
   
   def run(self, arguments):
-    self.select_plugin()
     self.args = arguments[1:]
     print self.args
     p = subprocess.Popen(' '.join(self.args), 
@@ -34,12 +32,26 @@ class MonitorOutput:
       line = output.readline()
       if not line:
         break
-      for event in self.curplugin.events:
-        match = self.search(event, line)
-        if match:
-          line = self.run_events(event, match, line)
+      line = self.handle_line(line)
       sys.stdout.write(line)
-      
+
+  def monitor_stdin(self):
+    intput = sys.stdin
+    
+    while True:
+      line = intput.readline()
+      if not line:
+        break
+      line = self.handle_line(line)
+      sys.stdout.write(line)
+
+  def handle_line(self, line):
+    for event in self.curplugin.events:
+      match = self.search(event, line)
+      if match:
+        line = self.run_events(event, match, line)
+    return line
+    
   def select_plugin(self):
     self.curplugin = self.MonitorPlugins[0]
   
@@ -97,7 +109,13 @@ class MonitorOutput:
 
 def parse_command_line():
     monitor_output = MonitorOutput()
-    monitor_output.run(sys.argv)
+    monitor_output.FindModules()
+    monitor_output.select_plugin()
+    
+    if len(sys.argv) == 1 or (len(sys.argv) >  1 and sys.argv[1] == '-o'):
+      monitor_output.monitor_stdin()
+    else:
+      monitor_output.run(sys.argv)
 
 if __name__ == "__main__":
     parse_command_line()
