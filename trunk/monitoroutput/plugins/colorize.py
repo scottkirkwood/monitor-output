@@ -19,7 +19,7 @@ class ColorizePlugin(_plugin.MonitorPlugin):
     self.events = [
       dict(
         params = re.IGNORECASE,
-        greps = [ 'Error', 'Exception in thread "'],
+        greps = [ 'Error', r'Exception in thread \"'],
         unless = [],
         commands = [ _notify_cmd.NotifyCmd(subject="Monitor Output", 
             message="Error occured"),],
@@ -72,6 +72,10 @@ class TestPlugin(_plugin.TestCommand):
     out = self.mo.handle_line(line)
     self.assertEquals('] \033[0;34mWARNING:\033[0m blabla', out)
 
+  def testThreadWarning(self):
+    line = 'Exception in thread "main" com.google.common.base.Flags$FlagUpdateError: '
+    out = self.mo.handle_line(line)
+    
 if __name__ == "__main__":
   import unittest
   unittest.main()
