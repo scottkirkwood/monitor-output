@@ -18,30 +18,41 @@ class ColorizePlugin(_plugin.MonitorPlugin):
     
     self.events = [
       dict(
+        name='Thread Exception',
         params = re.IGNORECASE,
         greps = [ 'Error', r'Exception in thread \"'],
         unless = [],
-        commands = [ _notify_cmd.NotifyCmd(subject="Monitor Output", 
+        commands = [ _notify_cmd.NotifyCmd(
             message="Error occured"),],
       ),
       dict(
-        greps = [ 'WARNING:'],
+        name='Warning',
+        greps = [ r'(.*\sWARNING:.*)'],
         unless = [],
         commands = [ _colorize_cmd.ColorizeCmd(color="Blue"),],
       ),
       dict(
+        name='Warning',
         params = re.IGNORECASE,
-        greps = [ 'Hey'],
+        greps = [ r'(.*\sERROR:.*)'],
         unless = [],
-        commands = [ _notify_cmd.NotifyCmd(subject="Monitor Output", 
+        commands = [ _notify_cmd.NotifyCmd(
             message="Error occured"),],
       ),
       dict(
+        name='Started',
         params = re.IGNORECASE,
         greps = [r'\s(\S+)\sinitialized and serving traffic'],
         unless = [],
-        commands = [ _notify_cmd.NotifyCmd(subject="Monitor Output", 
-            message="%(group1)s started and serving traffic"),],
+        commands = [ _notify_cmd.NotifyCmd( 
+            message=r"\1 started and serving traffic"),],
+      ),
+      dict(
+        name='Finished',
+        event='exit',
+        commands = [
+         _notify_cmd.NotifyCmd( 
+            message=r"Program has exited"),],
       ),
     ]
     
@@ -53,14 +64,12 @@ class ColorizePlugin(_plugin.MonitorPlugin):
     """ Description for help """
     return "given a regex turn the text a certain color using ANSI text"
     
-  def search(self):
-    pass
-  
 class TestPlugin(_plugin.TestCommand):
   def setUp(self):
     """ Setup self.instance here """
     self.mo = monitoroutput.monitoroutput.MonitorOutput()
     self.instance = ColorizePlugin()
+    #self.replaceCommands()
     self.mo.curplugin = self.instance
     
   def testServingTraffic(self):
@@ -70,12 +79,15 @@ class TestPlugin(_plugin.TestCommand):
   def testWarning(self):
     line = "] WARNING: blabla"
     out = self.mo.handle_line(line)
-    self.assertEquals('] \033[0;34mWARNING:\033[0m blabla', out)
+    self.assertEquals('\033[0;34m] WARNING: blabla\033[0m', out)
 
   def testThreadWarning(self):
     line = 'Exception in thread "main" com.google.common.base.Flags$FlagUpdateError: '
     out = self.mo.handle_line(line)
-    
+
+  def testThreadWarning(self):
+    out = self.mo.handle_exit()
+
 if __name__ == "__main__":
   import unittest
   unittest.main()
