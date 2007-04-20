@@ -10,9 +10,9 @@ import _notify_cmd
 import re
 
 def create_plugin():
-  return ColorizePlugin()
+  return DefaultPlugin()
   
-class ColorizePlugin(_plugin.MonitorPlugin):
+class DefaultPlugin(_plugin.MonitorPlugin):
   def __init__(self):
     _plugin.MonitorPlugin.__init__(self)
     
@@ -58,23 +58,27 @@ class ColorizePlugin(_plugin.MonitorPlugin):
     
   def name(self):
     """ This plugin's name """
-    return "colorize"
+    return "default"
     
   def description(self):
     """ Description for help """
-    return "given a regex turn the text a certain color using ANSI text"
+    return "Typical plugin for Java style output"
     
 class TestPlugin(_plugin.TestCommand):
   def setUp(self):
     """ Setup self.instance here """
     self.mo = monitoroutput.monitoroutput.MonitorOutput()
-    self.instance = ColorizePlugin()
-    #self.replaceCommands()
+    self.instance = DefaultPlugin()
     self.mo.curplugin = self.instance
     
-  def testServingTraffic(self):
-    line = "070419 19:07:11.861:I 40 [Thread-12] [com2.run] AXTE initialized and serving traffic"
-    self.mo.handle_line(line)
+  def testSearches(self):
+    lines = [
+      'Started', "070419 19:07:11.861:I 40 [Thread-12] [com2.run] AXTE initialized and serving traffic"
+    ]
+    for name, line in lines:
+      self.mo.replace_commands(name, [_plugin.FakeCommandPlugin(name)])
+      out = self.mo.handle_line(line)
+      self.assertEquals(name, out)
 
   def testWarning(self):
     line = "] WARNING: blabla"
