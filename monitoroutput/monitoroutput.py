@@ -31,6 +31,7 @@ class MonitorOutput:
     while True:
       line = output.readline()
       if not line:
+        self.handle_exit()
         break
       line = self.handle_line(line)
       sys.stdout.write(line)
@@ -51,7 +52,12 @@ class MonitorOutput:
       if match:
         line = self.run_events(event, match, line)
     return line
-    
+
+  def handle_exit(self):
+    for event in self.curplugin.events:
+      if 'event' in event and event['event'].lower().startswith('exit'):
+        self.run_events(event, None, None)
+
   def select_plugin(self):
     self.curplugin = self.MonitorPlugins[0]
   
@@ -61,6 +67,9 @@ class MonitorOutput:
     Here we should concat the regexes and memoize it for speed
     """
     found_groups = None
+    if not 'greps' in event:
+      return None
+    
     for grep in event['greps']:
       match = self._search_grep(grep, event.get('params', 0), line)
       if match:
