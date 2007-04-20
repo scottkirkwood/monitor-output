@@ -5,9 +5,24 @@
 
 Waiting for your compile to finish or server to startup is boring. Having a program do it for you is cool!
 
-= Details =
+http://monitor-output.googlecode.com/svn/trunk/doc/notify-screenshot.png
 
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
+How it works is you create a setup that searches for text in the output and when that text is detected it fires off a command.  The command can do anything including modifying the output as to make it appear different (ex. in color).
+
+= How To Run =
+
+The easiest way to run this in linux like systems is
+{{{
+myprogram --and --parameters 2>&1 | monitor-output
+}}}
+The 2>&1 is optional, but useful, it'll also send stderr output to monitor-output.
+If you want to monitor a log file you can run 
+{{{
+tail -f mylog.log | monitor-output
+}}}
+You can also ask monitor output to run the program for you, but I find it doesn't work quite the same so I advise against it for now.  Ex.
+{{{
+monitor-output myprogram
+}}}
+
+You can create various events by making "plugins" which need to live in the {{{python*/site-packages/monitor-output/monitoroutput/plugins}}} directory.  Any .py file in that directory that doesn't have an underscore at the start of the name will be loaded up as plugin.
