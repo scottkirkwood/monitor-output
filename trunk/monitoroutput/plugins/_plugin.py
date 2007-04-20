@@ -25,13 +25,14 @@ class CommandPlugin:
   def __call__(self, match, line):
     return line
 
-class FakeCommandPlugin(CommandPlugin):
+class FakeCommandPlugin:
   def __init__(self, to_return):
     self.to_return = to_return
+  
   def __call__(self, match, line):
     if match != None:
       return self.to_return
-    return line
+    return "!" + self.to_return
 
 class TestPlugin(unittest.TestCase):
   def setUp(self):
