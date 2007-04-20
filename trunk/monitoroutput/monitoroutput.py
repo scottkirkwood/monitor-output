@@ -14,14 +14,13 @@ import os
 import sys
 import select
 import subprocess
+import getopt
 
 class MonitorOutput:
   def __init__(self):
     self.args = ['cat', 'test_message.txt']
   
   def run(self, arguments):
-    self.args = arguments[1:]
-    print self.args
     p = subprocess.Popen(' '.join(self.args), 
         stdout=subprocess.PIPE, stderr=subprocess.STDOUT, 
         close_fds=True, shell=True)
@@ -59,8 +58,25 @@ class MonitorOutput:
         self.run_events(event, None, None)
 
   def select_plugin(self):
+    optlist, self.args = getopt.getops(sys.argv, '', ["--mo"]):
+
+    tofind = 'default'
+    if len(optlist) > 0:
+      if optlist[0][0] == '-mo':
+        tofind = optlist[0][1]
+    
+    for plugin in self.MonitorPlugins:
+      if plugin.get('name', '') == tofind:
+        self.curplugin = plugin
+        return
+    
     self.curplugin = self.MonitorPlugins[0]
   
+  def replace_commands(self, event_name, new_commands):
+    for event in self.curplugin.events:
+      if 'name' in event and event['name'] == event_name:
+        event['commands'] = new_commands
+    
   def search(self, event, line):
     """ Returns true if part matches 
     
@@ -70,17 +86,11 @@ class MonitorOutput:
     if not 'greps' in event:
       return None
     
-    for grep in event['greps']:
-      match = self._search_grep(grep, event.get('params', 0), line)
-      if match:
-        found_groups = match
-        break
-    return found_groups
+    if 'compile_regex' not in event:
+      grep = '|'.join(event['greps'])
+      event['compile_regex'] = re.compile(grep, event.get('params', 0))
     
-  def _search_grep(self, regex, params, line):
-    comp = re.compile(regex, params)
-    
-    return comp.search(line)
+    return  event['compile_regex'].search(line)
     
   def run_events(self, event, groups, line):
     """ Execute the event, possibly modifying the line """
@@ -88,7 +98,7 @@ class MonitorOutput:
       line = cmd(groups, line)
     return line
 
-  def FindModules(self):
+  def find_modules(self):
     self.MonitorPlugins = []
 
     pluginfiles = self._GetPluginFiles()
@@ -118,7 +128,7 @@ class MonitorOutput:
 
 def parse_command_line():
     monitor_output = MonitorOutput()
-    monitor_output.FindModules()
+    monitor_output.find_modules()
     monitor_output.select_plugin()
     
     if len(sys.argv) == 1 or (len(sys.argv) >  1 and sys.argv[1] == '-o'):

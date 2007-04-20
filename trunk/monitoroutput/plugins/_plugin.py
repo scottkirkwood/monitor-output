@@ -24,7 +24,15 @@ class MonitorPlugin:
 class CommandPlugin:
   def __call__(self, match, line):
     return line
-  
+
+class FakeCommandPlugin(CommandPlugin):
+  def __init__(self, to_return):
+    self.to_return = to_return
+  def __call__(self, match, line):
+    if match != None:
+      return self.to_return
+    return line
+
 class TestPlugin(unittest.TestCase):
   def setUp(self):
     """ Setup self.instance here """
