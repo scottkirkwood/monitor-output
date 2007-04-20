@@ -58,7 +58,7 @@ class MonitorOutput:
         self.run_events(event, None, None)
 
   def select_plugin(self):
-    optlist, self.args = getopt.getops(sys.argv, '', ["--mo"]):
+    optlist, self.args = getopt.getops(sys.argv, '', ["--mo"])
 
     tofind = 'default'
     if len(optlist) > 0:
@@ -73,9 +73,20 @@ class MonitorOutput:
     self.curplugin = self.MonitorPlugins[0]
   
   def replace_commands(self, event_name, new_commands):
+    """ Replace a command with your own, used for testing
+    
+    Returns: True if replaced, False if not found
+    """
+    if event_name.startswith('!'):
+      event_name = event_name[1:]
+    
     for event in self.curplugin.events:
       if 'name' in event and event['name'] == event_name:
+        print event['commands']
         event['commands'] = new_commands
+        print event['commands']
+        return True
+    return False
     
   def search(self, event, line):
     """ Returns true if part matches 
@@ -94,6 +105,7 @@ class MonitorOutput:
     
   def run_events(self, event, groups, line):
     """ Execute the event, possibly modifying the line """
+    
     for cmd in event['commands']:
       line = cmd(groups, line)
     return line
