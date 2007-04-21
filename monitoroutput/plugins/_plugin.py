@@ -6,40 +6,40 @@
 import unittest
 
 class MonitorPlugin:
-  def __init__(self):
-    self.events = [
-    ]
-  
-  def name(self):
-    """ This plugin's name """
-    pass
-    
-  def description(self):
-    """ Description for help """
-    pass
-    
-  def search(self):
-    pass
+    def __init__(self):
+        self.events = [
+        ]
+
+    def name(self):
+        """ This plugin's name """
+        pass
+
+    def description(self):
+        """ Description for help """
+        pass
+
+    def search(self):
+        pass
 
 class CommandPlugin:
-  def __call__(self, match, line):
-    return line
+    def __call__(self, match, line):
+        return line
 
 class FakeCommandPlugin:
-  def __init__(self, to_return):
-    self.to_return = to_return
-  
-  def __call__(self, match, line):
-    if match != None:
-      return self.to_return
-    return "!" + self.to_return
+    def __init__(self, to_return):
+        self.to_return = to_return
+
+    def __call__(self, match, line):
+        if match != None:
+            return self.to_return
+        return None # Return something else
 
 class TestPlugin(unittest.TestCase):
-  def setUp(self):
-    """ Setup self.instance here """
-    pass
-    
+    def setUp(self):
+        """ Setup self.instance here """
+        pass
+
 class TestCommand(unittest.TestCase):
-  def setUp(self):
-    """ Setup self.instance here """
-    pass
+    def setUp(self):
+        """ Setup self.instance here """
+        pass
