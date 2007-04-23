@@ -13,10 +13,10 @@ How it works is you create a setup that searches for text in the output and when
 
 The easiest way to run this in linux like systems is
 {{{
-myprogram --and --parameters 2>&1 | monitor-output
+myprogram 2>&1 | monitor-output
 }}}
-The 2>&1 is optional, but useful, it'll also send stderr output to monitor-output.
-If you want to monitor a log file you can run 
+The "2>&1" part is optional, but useful, it'll also send stderr output to monitor-output.
+If you want to monitor a log file you can run:
 {{{
 tail -f mylog.log | monitor-output
 }}}
@@ -26,3 +26,10 @@ monitor-output myprogram
 }}}
 
 You can create various events by making "plugins" which need to live in the {{{python*/site-packages/monitor-output/monitoroutput/plugins}}} directory.  Any .py file in that directory that doesn't have an underscore at the start of the name will be loaded up as plugin.
+
+You may have different plug-ins for different types of output, you can do this with::
+{{{
+myprogram 2>&1 | monitor-output --mop myplugin
+}}}
+
+The option --mop (for monitor-output plugin) which pick which plugin to use.  The default is to use the plugin called "default".
