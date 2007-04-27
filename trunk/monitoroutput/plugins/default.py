@@ -28,7 +28,8 @@ class DefaultPlugin(_plugin.MonitorPlugin):
             greps = [ 'Error', r'Exception in thread \"'],
             unless = [],
             commands = [ _notify_cmd.NotifyCmd(
-                message="Error occured"),],
+                message="Exception occured"),
+                _colorize_cmd.ColorizeCmd(color="Red"),],
           ),
           dict(
             name='Warning',
@@ -42,7 +43,8 @@ class DefaultPlugin(_plugin.MonitorPlugin):
             greps = [ r'(.*\sERROR.*)'],
             unless = [r'ErrorClass', r'ErrorException'],
             commands = [ _notify_cmd.NotifyCmd(
-                message="Error occured"),],
+                message="Error occured"),                
+                _colorize_cmd.ColorizeCmd(color="Red"),],
           ),
           dict(
             name='Started',
