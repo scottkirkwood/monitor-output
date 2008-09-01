@@ -37,6 +37,7 @@ class MonitorOutput:
       line = self.handle_line(line)
       sys.stdout.write(line)
 
+    print "Done"
   def monitor_stdin(self):
     intput = sys.stdin
     
@@ -58,6 +59,7 @@ class MonitorOutput:
   def handle_exit(self):
     for event in self.curplugin.events:
       if 'event' in event and event['event'].lower().startswith('exit'):
+        print "Found exit event"
         self.run_events(event, None, None)
 
   def select_plugin(self):
@@ -152,7 +154,6 @@ def parse_command_line():
     else:
       monitor_output.run(sys.argv)
 
-    print "Done2"
 
 if __name__ == "__main__":
     parse_command_line()

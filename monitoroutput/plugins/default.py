@@ -37,6 +37,12 @@ class DefaultPlugin(_plugin.MonitorPlugin):
             unless = [],
             commands = [ _colorize_cmd.ColorizeCmd(color="Blue"),],
           ),
+        dict(
+            name='NoTarget',
+            greps = [ r'(No rule to make target)'], # Consider running gconfig 
+            unless = [],
+            commands = [ _colorize_cmd.ColorizeCmd(color="LightRed"),],
+          ),
           dict(
             name='Error',
             params = re.IGNORECASE,
