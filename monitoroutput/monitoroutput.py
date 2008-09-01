@@ -43,6 +43,7 @@ class MonitorOutput:
     while True:
       line = intput.readline()
       if not line:
+        self.handle_exit()
         break
       line = self.handle_line(line)
       sys.stdout.write(line)
@@ -150,6 +151,8 @@ def parse_command_line():
       monitor_output.monitor_stdin()
     else:
       monitor_output.run(sys.argv)
+
+    print "Done2"
 
 if __name__ == "__main__":
     parse_command_line()
